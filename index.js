@@ -53,6 +53,37 @@ const newspapers = [
     base: "https://bitcoinmagazine.com",
   },
 ];
+
+newspapers.forEach((newspaper) => {
+  axios.get(newspaper.address).then((response) => {
+    const html = response.data;
+    const $ = cheerio.load(html);
+
+    $("a:contains('Dogecoin')", html).each(function () {
+      const title = $(this).text();
+      const url = $(this).attr("href");
+      url.includes("tag" || "tags")
+        ? ""
+        : articles.push({
+            title,
+            url: newspaper.base + url,
+            source: newspaper.name,
+          });
+    });
+    $("a:contains('Doge')", html).each(function () {
+      const title = $(this).text();
+      const url = $(this).attr("href");
+      url.includes("tag" || "tags")
+        ? ""
+        : articles.push({
+            title,
+            url: newspaper.base + url,
+            source: newspaper.name,
+          });
+    });
+  });
+});
+
 const articles = [];
 
 app.get("/", (req, res) => {
@@ -60,23 +91,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/news", (req, res) => {
-  axios
-    .get("https://www.dr.dk/nyheder/politik")
-    .then((response) => {
-      const html = response.data;
-      const $ = cheerio.load(html);
-
-      $("a:contains('Danmark')", html).each(function () {
-        const title = $(this).text();
-        const url = $(this).attr("href");
-        articles.push({
-          title,
-          url,
-        });
-      });
-      res.json(articles);
-    })
-    .catch((error) => console.log(err));
+  res.json(articles);
 });
 
 app.listen(PORT, () => console.log(`server running on PORT ${PORT}`));
